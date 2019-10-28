@@ -4,10 +4,10 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{369DE44F-AAFC-4DA0-B8B4-5931F59B250E}</ProjectGuid>
+    <ProjectGuid>{EF03A365-7752-413B-A8DA-9F4422351C49}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>ServerClient</RootNamespace>
-    <AssemblyName>ServerClient</AssemblyName>
+    <RootNamespace>PipeClient</RootNamespace>
+    <AssemblyName>PipeClient</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -36,18 +36,10 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="SocketClient.cs" />
+    <Compile Include="PipeClient.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
-    <Reference Include="System.Net" />
-    <Reference Include="System.Net.Http" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Memory\Memory.csproj">
-      <Project>{f14f0452-5071-4f76-a3d5-3d3f6c0a0f68}</Project>
-      <Name>Memory</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -3,15 +3,17 @@ using System;
 using System.Text;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading;
+using WpfApp2;
 
 namespace ServerSocket
 {
     public class Server
     {
-        public string ReceivedData;
-        public Server()
+        public void Start()
         {
             // Устанавливаем для сокета локальную конечную точку
+            
             IPHostEntry ipHost = Dns.GetHostEntry("localhost");
             IPAddress ipAddr = ipHost.AddressList[0];
             IPEndPoint ipEndPoint = new IPEndPoint(ipAddr, 11000);
@@ -40,9 +42,10 @@ namespace ServerSocket
                     int bytesRec = handler.Receive(bytes);
                     
                     data += Encoding.UTF8.GetString(bytes, 0, bytesRec);
-                    ReceivedData = data;
                     // Показываем данные на консоли
+
                     Console.Write("Полученный текст: " + data + "\n\n");
+                    MainWindow.Handler handler1;
                     
                     // Отправляем ответ клиенту\
                     string reply = "Спасибо за запрос в " + data.Length.ToString()
@@ -58,6 +61,7 @@ namespace ServerSocket
                     
                     handler.Shutdown(SocketShutdown.Both);
                     handler.Close();
+                    Thread.Sleep(50);
                 }
             }
             catch (Exception ex)

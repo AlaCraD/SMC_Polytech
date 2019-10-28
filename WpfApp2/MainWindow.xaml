@@ -5,13 +5,4 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WpfApp2"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
-        <Grid.ColumnDefinitions>
-
-            <ColumnDefinition Width="101*"/>
-        </Grid.ColumnDefinitions>
-        <TextBox x:Name="ipEndPoint_ipAddr" HorizontalAlignment="Left" Height="22" Margin="10,10,0,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="99" TextChanged="IpEndPoint_ipAddr_TextChanged"/>
-
-    </Grid>
-</Window>
+        Title="MainWindow" Height="450" Width="800"/>

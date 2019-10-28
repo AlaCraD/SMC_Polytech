@@ -55,7 +55,6 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="SocketServer.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -94,6 +93,20 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Memory\Memory.csproj">
+      <Project>{f14f0452-5071-4f76-a3d5-3d3f6c0a0f68}</Project>
+      <Name>Memory</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ServerClient\ServerClient.csproj">
+      <Project>{369de44f-aafc-4da0-b8b4-5931f59b250e}</Project>
+      <Name>ServerClient</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Server\Server.csproj">
+      <Project>{a20f5869-26b9-4283-a187-ad46552b86dc}</Project>
+      <Name>Server</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
