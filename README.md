@@ -1,1 +1,1 @@
-# MVS_projects
+# SMC_Polytech
