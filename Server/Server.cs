@@ -7,15 +7,17 @@ using System.Threading;
 using System.IO.Pipes;
 using System.Linq;
 using System.IO;
+using System.Data;
+using WebRobot_ComputerFutures;
 
 namespace Server
 {
     public class ServerEventArgs
     {
         // Сообщение
-        public string Message { get; }
+        protected string Message { get; }
         // Сумма, на которую изменился счет
-        public string Sum { get; }
+        protected string Sum { get; }
 
         public ServerEventArgs(string mes, string sum)
         {
@@ -26,10 +28,10 @@ namespace Server
 
     public class Server
     {
-        public delegate void ServerHandler(object sender, ServerEventArgs e);
-        public event ServerHandler Notify;
+        public delegate void ServerHandler(ServerEventArgs e);
+        public static event ServerHandler Notify;
 
-        public void Main(string[] args)
+        public static void Main(string[] args)
         {
             if (args.Length > 0)
             {
@@ -71,7 +73,7 @@ namespace Server
                             // Показываем данные на консоли
                             Console.WriteLine("Полученный текст: " + data + "\n");
                             SendToPipe(pipeServer, data);
-                            Notify?.Invoke(this, new ServerEventArgs(($"ПОЛУЧЕНО: {data}"),data));
+                            Notify?.Invoke(new ServerEventArgs(($"ПОЛУЧЕНО: {data}"),data));
                             // Отправляем ответ клиенту\
                             string reply = "Спасибо за запрос в " + data.Length.ToString()
                                     + " символов";
@@ -113,7 +115,42 @@ namespace Server
                 }
             }
         }
-        
-        public 
+
+        private void Db_Update_Add_Record(string sURL, string sTitle)
+        {
+            //--------< db_Update_Add_Record() >--------
+
+            //*Update or add Record
+
+            //< correct>
+            sURL = sURL.Replace("'", "''");
+            sTitle = sTitle.Replace("'", "''");
+            //</ correct>
+
+            //< find record >
+            string sSQL = "SELECT TOP 1 * FROM ServerTable1 WHERE [URL] Like '" + sURL + "'";
+            DataTable tbl = clsDB.Get_DataTable(sSQL);
+            //</ find record >
+
+            if (tbl.Rows.Count == 0)
+            {
+                //< add >
+                string sql_Add = "INSERT INTO ServerTable1 ([URL],[Title],[dtScan]) VALUES('" + sURL + "','" + sTitle + "',SYSDATETIME())";
+                clsDB.Execute_SQL(sql_Add);
+                //</ add >
+            }
+
+            else
+            {
+                //< update >
+                string ID = tbl.Rows[0]["IdDetail"].ToString();
+                string sql_Update = "UPDATE ServerTable1 SET [dtScan] = SYSDATETIME() WHERE IDDetail = " + ID;
+                clsDB.Execute_SQL(sql_Update);
+                //</ update >
+            }
+            //--------</ db_Update_Add_Record() >--------
+        }
+
+
     }
 }

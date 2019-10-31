@@ -19,6 +19,7 @@ using System.Diagnostics;
 using System.IO.Pipes;
 using System.IO;
 using System.Timers;
+using System.ComponentModel;
 
 namespace WpfApp2
 {
@@ -29,8 +30,51 @@ namespace WpfApp2
     {
         public delegate void Handler(string message);
         Handler _Handler;
-        
+        public class MyText
+        {
+            public string someText { get; set; }
+        }
+        public class People : INotifyPropertyChanged // Наследуемся от нужного интерфеса
+        {
+            // Ваши поля 
+            private string name, name2;
 
+            public event PropertyChangedEventHandler PropertyChanged; // Событие, которое нужно вызывать при изменении
+
+            // Для удобства обернем событие в метод с единственным параметром - имя изменяемого свойства
+            public void RaisePropertyChanged(string propertyName)
+            {
+                // Если кто-то на него подписан, то вызывем его
+                if (PropertyChanged != null)
+                    PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+            }
+
+            // А тут будут свойства, в которые мы обернем поля
+            public string Name
+            {
+                get { return name; }
+                set
+                {
+                    // Устанавливаем новое значение
+                    name = value;
+                    // Сообщаем всем, кто подписан на событие PropertyChanged, что поле изменилось Name
+                    RaisePropertyChanged("Name");
+                }
+            }
+
+            public string Name2
+            {
+                get { return name2; }
+                set
+                {
+                    // Устанавливаем новое значение
+                    name2 = value;
+                    // Сообщаем всем, кто подписан на событие PropertyChanged, что поле изменилось Name2
+                    RaisePropertyChanged("Name2");
+                }
+            }
+        }
+        public MyText myText { get; set; }
         public void RegisterHandler(Handler handler)
         {
             _Handler = handler;
@@ -38,13 +82,26 @@ namespace WpfApp2
 
         public MainWindow()
         {
+            
             // Получить поток, выполняющий данный метод.
             InitializeComponent();
             //_Handler = ShowText;
-            
+            myText = new MyText
+            {
+                someText = "blyat"
+            };
+            People P = new People() { Name = "Ololosha", Name2 = "Trololosha" };
+            DataContext = P;
             Process server = new Process();
-
             server.StartInfo.FileName = "Server.exe";
+
+            //void ShowText(string mess, object obj)
+            //{
+            //    if (obj.GetType != mess)
+            //        id.Text = mess;
+            //    Thread.Sleep(10);
+            //}
+
             using (AnonymousPipeServerStream pipeMainWindow =
                 new AnonymousPipeServerStream(PipeDirection.In, HandleInheritability.Inheritable))
             {
@@ -57,39 +114,27 @@ namespace WpfApp2
                 server.StartInfo.UseShellExecute = false;
                 server.Start();
 
-                pipeMainWindow.DisposeLocalCopyOfClientHandle();
-
-                ReceivePipe(pipeMainWindow);
+                pipeMainWindow.DisposeLocalCopyOfClientHandle(); 
             }
-            //void ShowText(string mess, object obj)
-            //{
-            //    if (obj.GetType != mess)
-            //        id.Text = mess;
-            //    Thread.Sleep(10);
-            //}
-            string ReceivePipe(PipeStream pipeStream)
-            {
-                string temp;
-                using (StreamReader sr = new StreamReader(pipeStream))
-                {
-                    while ((temp = sr.ReadLine()) != null)
-                    {
-                        temp += temp;
-                        Console.WriteLine("[MainWindow] Echo: " + temp);
-                    }
-                }
-                return temp;
-            }
-
-            
-
-            
-
         }
 
-        private void IpEndPoint_ipAddr_TextChanged(object sender, TextChangedEventArgs e)
+        private void Button_Click(object sender, RoutedEventArgs e)
         {
+                myText.someText = "sosat";
+        }
 
+        string ReceivePipe(PipeStream pipeStream)
+        {
+            string temp;
+            using (StreamReader sr = new StreamReader(pipeStream))
+            {
+                while ((temp = sr.ReadLine()) != null)
+                {
+                    temp += temp;
+                    Console.WriteLine("[MainWindow] Echo: " + temp);
+                }
+            }
+            return temp;
         }
     }
 }

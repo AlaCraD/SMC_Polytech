@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace WpfApp2.Properties {
+namespace Server.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
@@ -20,6 +20,19 @@ namespace WpfApp2.Properties {
         public static Settings Default {
             get {
                 return defaultInstance;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Data Source=(LocalDB)\\MSSQLLocalDB;AttachDbFilename=F:\\MVS_projects\\Server\\data\\L" +
+            "ocalDB.mdf;Integrated Security=True")]
+        public string Connection_db {
+            get {
+                return ((string)(this["Connection_db"]));
+            }
+            set {
+                this["Connection_db"] = value;
             }
         }
     }
