@@ -8,7 +8,7 @@ using System.IO.Pipes;
 using System.Linq;
 using System.IO;
 using System.Data;
-using WebRobot_ComputerFutures;
+using ClassDB;
 
 namespace Server
 {
@@ -35,83 +35,65 @@ namespace Server
         {
             if (args.Length > 0)
             {
-                using (PipeStream pipeServer =
-                    new AnonymousPipeClientStream(PipeDirection.Out, args[0]))
+                // Устанавливаем для сокета локальную конечную точку
+
+                IPHostEntry ipHost = Dns.GetHostEntry("localhost");
+                IPAddress ipAddr = ipHost.AddressList[0];
+                IPEndPoint ipEndPoint = new IPEndPoint(ipAddr, 11000);
+
+                // Создаем сокет Tcp/Ip
+                Socket sListener = new Socket(ipAddr.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+
+                // Назначаем сокет локальной конечной точке и слушаем входящие сокеты
+                try
                 {
-                    Console.WriteLine("[CLIENT] Current TransmissionMode: {0}.", pipeServer.TransmissionMode);
-                    // Устанавливаем для сокета локальную конечную точку
+                    sListener.Bind(ipEndPoint);
+                    sListener.Listen(10);
 
-                    IPHostEntry ipHost = Dns.GetHostEntry("localhost");
-                    IPAddress ipAddr = ipHost.AddressList[0];
-                    IPEndPoint ipEndPoint = new IPEndPoint(ipAddr, 11000);
-
-                    // Создаем сокет Tcp/Ip
-                    Socket sListener = new Socket(ipAddr.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-
-                    // Назначаем сокет локальной конечной точке и слушаем входящие сокеты
-                    try
+                    // Начинаем слушать соединения
+                    while (true)
                     {
-                        sListener.Bind(ipEndPoint);
-                        sListener.Listen(10);
 
-                        // Начинаем слушать соединения
-                        while (true)
+                        Console.WriteLine("Ожидаем соединение через порт {0}", ipEndPoint);
+
+                        // Программа приостанавливается, ожидая входящее соединение
+                        Socket handler = sListener.Accept();
+                        string data = null;
+
+                        // Мы дождались клиента, пытающегося с нами соединиться
+
+                        byte[] bytes = new byte[1024];
+                        int bytesRec = handler.Receive(bytes);
+
+                        data += Encoding.UTF8.GetString(bytes, 0, bytesRec);
+                        // Показываем данные на консоли
+                        Console.WriteLine("Полученный текст: " + data + "\n");
+                        ClsDB.Execute_SQL($"INSERT INTO {args[0]} {data}");   
+                        Notify?.Invoke(new ServerEventArgs(($"ПОЛУЧЕНО: {data}"),data));
+                        // Отправляем ответ клиенту\
+                        string reply = "Спасибо за запрос в " + data.Length.ToString()
+                                + " символов";
+                        byte[] msg = Encoding.UTF8.GetBytes(reply);
+                        handler.Send(msg);
+
+                        if (data.IndexOf("<TheEnd>") > -1)
                         {
-
-                            Console.WriteLine("Ожидаем соединение через порт {0}", ipEndPoint);
-
-                            // Программа приостанавливается, ожидая входящее соединение
-                            Socket handler = sListener.Accept();
-                            string data = null;
-
-                            // Мы дождались клиента, пытающегося с нами соединиться
-
-                            byte[] bytes = new byte[1024];
-                            int bytesRec = handler.Receive(bytes);
-
-                            data += Encoding.UTF8.GetString(bytes, 0, bytesRec);
-                            // Показываем данные на консоли
-                            Console.WriteLine("Полученный текст: " + data + "\n");
-                            SendToPipe(pipeServer, data);
-                            Notify?.Invoke(new ServerEventArgs(($"ПОЛУЧЕНО: {data}"),data));
-                            // Отправляем ответ клиенту\
-                            string reply = "Спасибо за запрос в " + data.Length.ToString()
-                                    + " символов";
-                            byte[] msg = Encoding.UTF8.GetBytes(reply);
-                            handler.Send(msg);
-
-                            if (data.IndexOf("<TheEnd>") > -1)
-                            {
-                                Console.WriteLine("Сервер завершил соединение с клиентом.");
-                                break;
-                            }
-
-                            handler.Shutdown(SocketShutdown.Both);
-                            handler.Close();
-                            Thread.Sleep(50);
+                            Console.WriteLine("Сервер завершил соединение с клиентом.");
+                            break;
                         }
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine(ex.ToString());
-                    }
-                    finally
-                    {
-                        Console.ReadLine();
+
+                        handler.Shutdown(SocketShutdown.Both);
+                        handler.Close();
+                        Thread.Sleep(50);
                     }
                 }
-            }
-
-            void SendToPipe(PipeStream pipeStream, string message)
-            {
-                using (StreamWriter sw = new StreamWriter(pipeStream))
+                catch (Exception ex)
                 {
-                    sw.AutoFlush = true;
-                    // Send a 'sync message' and wait for client to receive it.
-                    pipeStream.WaitForPipeDrain();
-                    // Send the console input to the client process.
-                    Console.WriteLine($"[SERVER] Sended text: {message}");
-                    sw.WriteLine(message);
+                    Console.WriteLine(ex.ToString());
+                }
+                finally
+                {
+                    Console.ReadLine();
                 }
             }
         }
@@ -129,14 +111,14 @@ namespace Server
 
             //< find record >
             string sSQL = "SELECT TOP 1 * FROM ServerTable1 WHERE [URL] Like '" + sURL + "'";
-            DataTable tbl = clsDB.Get_DataTable(sSQL);
+            DataTable tbl = ClsDB.Get_DataTable(sSQL);
             //</ find record >
 
             if (tbl.Rows.Count == 0)
             {
                 //< add >
                 string sql_Add = "INSERT INTO ServerTable1 ([URL],[Title],[dtScan]) VALUES('" + sURL + "','" + sTitle + "',SYSDATETIME())";
-                clsDB.Execute_SQL(sql_Add);
+                ClsDB.Execute_SQL(sql_Add);
                 //</ add >
             }
 
@@ -145,7 +127,7 @@ namespace Server
                 //< update >
                 string ID = tbl.Rows[0]["IdDetail"].ToString();
                 string sql_Update = "UPDATE ServerTable1 SET [dtScan] = SYSDATETIME() WHERE IDDetail = " + ID;
-                clsDB.Execute_SQL(sql_Update);
+                ClsDB.Execute_SQL(sql_Update);
                 //</ update >
             }
             //--------</ db_Update_Add_Record() >--------
