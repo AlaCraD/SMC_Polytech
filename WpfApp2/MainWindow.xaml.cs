@@ -14,7 +14,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Server;
 using System.Threading;
-using System.IO.MemoryMappedFiles;
+using System.IO.Ports;
 using System.Diagnostics;
 using System.IO.Pipes;
 using System.IO;
@@ -93,29 +93,16 @@ namespace WpfApp2
             People P = new People() { Name = "Ololosha", Name2 = "Trololosha" };
             DataContext = P;
             Process server = new Process();
+            server.StartInfo.Arguments = "ServerTable1";
+            server.StartInfo.UseShellExecute = false;
             server.StartInfo.FileName = "Server.exe";
 
-            //void ShowText(string mess, object obj)
-            //{
-            //    if (obj.GetType != mess)
-            //        id.Text = mess;
-            //    Thread.Sleep(10);
-            //}
+            
+            
 
-            using (AnonymousPipeServerStream pipeMainWindow =
-                new AnonymousPipeServerStream(PipeDirection.In, HandleInheritability.Inheritable))
-            {
-                Console.WriteLine("[SERVER] Current TransmissionMode: {0}.",
-                pipeMainWindow.TransmissionMode);
-
-                // Pass the client process a handle to the server.
-                server.StartInfo.Arguments =
-                    pipeMainWindow.GetClientHandleAsString();
-                server.StartInfo.UseShellExecute = false;
-                server.Start();
-
-                pipeMainWindow.DisposeLocalCopyOfClientHandle(); 
-            }
+            //Server.Server.Notify += Button_Click();
+            
+            server.Start();
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
@@ -123,6 +110,7 @@ namespace WpfApp2
                 myText.someText = "sosat";
         }
 
+        public 
         string ReceivePipe(PipeStream pipeStream)
         {
             string temp;

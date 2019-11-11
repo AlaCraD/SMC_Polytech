@@ -22,5 +22,18 @@ namespace WpfApp2.Properties {
                 return defaultInstance;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Data Source=(LocalDB)\\MSSQLLocalDB;AttachDbFilename=F:\\MVS_projects\\Server\\data\\L" +
+            "ocalDB.mdf;Integrated Security=True")]
+        public string db_connection {
+            get {
+                return ((string)(this["db_connection"]));
+            }
+            set {
+                this["db_connection"] = value;
+            }
+        }
     }
 }

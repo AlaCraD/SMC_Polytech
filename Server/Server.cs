@@ -6,7 +6,7 @@ using System.Net.Sockets;
 using System.Threading;
 using System.IO.Pipes;
 using System.Linq;
-using System.IO;
+using System.IO.Ports;
 using System.Data;
 using ClassDB;
 
@@ -33,7 +33,43 @@ namespace Server
 
         public static void Main(string[] args)
         {
-            if (args.Length > 0)
+            SerialPort port;
+            // получаем список доступных портов 
+            string[] ports = SerialPort.GetPortNames();
+
+            Console.WriteLine("Выберите порт:");
+
+            // выводим список портов
+            for (int i = 0; i < ports.Length; i++)
+            {
+                Console.WriteLine("[" + i.ToString() + "] " + ports[i].ToString());
+            }
+            port = new SerialPort();
+
+            // читаем номер из консоли
+            string n = Console.ReadLine();
+            int num = int.Parse(n);
+            try
+            {
+                // настройки порта
+                port.PortName = ports[num];
+                port.BaudRate = 115200;
+                port.DataBits = 8;
+                port.Parity = System.IO.Ports.Parity.None;
+                port.StopBits = System.IO.Ports.StopBits.One;
+                port.ReadTimeout = 1000;
+                port.WriteTimeout = 1000;
+                port.Open();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("ERROR: невозможно открыть порт:" + e.ToString());
+                Console.ReadKey();
+                return;
+            }
+
+            
+            //if (args.Length > 0)
             {
                 // Устанавливаем для сокета локальную конечную точку
 
@@ -41,9 +77,9 @@ namespace Server
                 IPAddress ipAddr = ipHost.AddressList[0];
                 IPEndPoint ipEndPoint = new IPEndPoint(ipAddr, 11000);
 
+                //ClsDB.Execute_SQL($"SHOW TABLE FROM dbo LIKE {args[0]}");
                 // Создаем сокет Tcp/Ip
                 Socket sListener = new Socket(ipAddr.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-
                 // Назначаем сокет локальной конечной точке и слушаем входящие сокеты
                 try
                 {
@@ -68,7 +104,13 @@ namespace Server
                         data += Encoding.UTF8.GetString(bytes, 0, bytesRec);
                         // Показываем данные на консоли
                         Console.WriteLine("Полученный текст: " + data + "\n");
-                        ClsDB.Execute_SQL($"INSERT INTO {args[0]} {data}");   
+                        string[] datasplit = data.Split(new char[] { ' ' });
+
+                        Console.WriteLine($"INSERT INTO {args[0]} ({datasplit[0]}) VALUES ({datasplit[1]})");
+                        ClsDB.Execute_SQL($"INSERT INTO {args[0]} ({datasplit[0]}) VALUES ({datasplit[1]})");
+
+                        port.Write(bytes, 0, bytes.Length);
+
                         Notify?.Invoke(new ServerEventArgs(($"ПОЛУЧЕНО: {data}"),data));
                         // Отправляем ответ клиенту\
                         string reply = "Спасибо за запрос в " + data.Length.ToString()
@@ -79,6 +121,7 @@ namespace Server
                         if (data.IndexOf("<TheEnd>") > -1)
                         {
                             Console.WriteLine("Сервер завершил соединение с клиентом.");
+                            port.Close();
                             break;
                         }
 

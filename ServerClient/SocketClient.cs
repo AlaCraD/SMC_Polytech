@@ -23,6 +23,8 @@ namespace SocketClient
             }
         }
 
+
+        public static byte[] messs = {11, 0,0,10,0, 0, 0,0,0, 21};
         static void SendMessageFromSocket(int port)
         {
             // Буфер для входящих данных
@@ -47,7 +49,7 @@ namespace SocketClient
             byte[] msg = Encoding.UTF8.GetBytes(message);
 
             // Отправляем данные через сокет
-            int bytesSent = sender.Send(msg);
+            int bytesSent = sender.Send(messs);
 
             // Получаем ответ от сервера
             int bytesRec = sender.Receive(bytes);
@@ -55,8 +57,7 @@ namespace SocketClient
             Console.WriteLine("\nОтвет от сервера: {0}\n\n", Encoding.UTF8.GetString(bytes, 0, bytesRec));
 
             // Используем рекурсию для неоднократного вызова SendMessageFromSocket()
-            if (message.IndexOf("<TheEnd>") == -1)
-                SendMessageFromSocket(port);
+
 
             // Освобождаем сокет
             sender.Shutdown(SocketShutdown.Both);
