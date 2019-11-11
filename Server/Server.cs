@@ -106,10 +106,13 @@ namespace Server
                         Console.WriteLine("Полученный текст: " + data + "\n");
                         string[] datasplit = data.Split(new char[] { ' ' });
 
-                        Console.WriteLine($"INSERT INTO {args[0]} ({datasplit[0]}) VALUES ({datasplit[1]})");
-                        ClsDB.Execute_SQL($"INSERT INTO {args[0]} ({datasplit[0]}) VALUES ({datasplit[1]})");
+                        //Console.WriteLine($"INSERT INTO {args[0]} ({datasplit[0]}) VALUES ({datasplit[1]})");
+                        //ClsDB.Execute_SQL($"INSERT INTO {args[0]} ({datasplit[0]}) VALUES ({datasplit[1]})");
 
-                        port.Write(bytes, 0, bytes.Length);
+                        port.Write(bytes, 1, bytes[0]);
+                        port.Write(bytes, 1, bytes[0]);
+                        port.Write(bytes, 1, bytes[0]);
+                        port.Write(bytes, 1, bytes[0]);
 
                         Notify?.Invoke(new ServerEventArgs(($"ПОЛУЧЕНО: {data}"),data));
                         // Отправляем ответ клиенту\

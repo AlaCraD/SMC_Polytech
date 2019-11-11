@@ -24,7 +24,7 @@ namespace SocketClient
         }
 
 
-        public static byte[] messs = {11, 0,0,10,0, 0, 0,0,0, 21};
+        public static byte[] messs = {10, 11, 0,0,10,0, 0, 0,0,0, 21};
         static void SendMessageFromSocket(int port)
         {
             // Буфер для входящих данных
